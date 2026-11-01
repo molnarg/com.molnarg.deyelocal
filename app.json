@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
   "id": "com.molnarg.deyelocal",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "compatibility": ">=5.0.0",
   "sdk": 3,
   "platforms": [
@@ -30,6 +30,12 @@
   "source": "https://github.com/molnarg/com.molnarg.deyelocal",
   "bugs": {
     "url": "https://github.com/molnarg/com.molnarg.deyelocal/issues"
+  },
+  "api": {
+    "getStatus": {
+      "method": "GET",
+      "path": "/status"
+    }
   },
   "flow": {
     "triggers": [
@@ -81,8 +87,158 @@
               "en": "Battery (%)"
             },
             "example": 80
+          },
+          {
+            "name": "surplus",
+            "type": "number",
+            "title": {
+              "en": "Surplus (W)"
+            },
+            "example": 2300
           }
         ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=sg04lp3"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "value_held",
+        "title": {
+          "en": "Value has !{{been|not been}} above/below a limit for a while"
+        },
+        "titleFormatted": {
+          "en": "[[quantity]] has !{{been|not been}} [[comparison]] [[threshold]] for the last [[seconds]] seconds"
+        },
+        "hint": {
+          "en": "True only if every reading in the window is beyond the limit, readings cover the whole window (it is false right after 'Restart history' until enough new readings arrive), and the latest reading is fresh."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=sg04lp3"
+          },
+          {
+            "name": "quantity",
+            "type": "dropdown",
+            "title": {
+              "en": "Value"
+            },
+            "values": [
+              {
+                "id": "surplus",
+                "title": {
+                  "en": "Surplus"
+                }
+              },
+              {
+                "id": "solar",
+                "title": {
+                  "en": "Solar power"
+                }
+              },
+              {
+                "id": "battery",
+                "title": {
+                  "en": "Battery %"
+                }
+              }
+            ]
+          },
+          {
+            "name": "comparison",
+            "type": "dropdown",
+            "title": {
+              "en": "Comparison"
+            },
+            "values": [
+              {
+                "id": "above",
+                "title": {
+                  "en": "above"
+                }
+              },
+              {
+                "id": "below",
+                "title": {
+                  "en": "below"
+                }
+              }
+            ]
+          },
+          {
+            "name": "threshold",
+            "type": "number",
+            "title": {
+              "en": "Limit"
+            },
+            "placeholder": {
+              "en": "3000"
+            }
+          },
+          {
+            "name": "seconds",
+            "type": "number",
+            "title": {
+              "en": "Seconds"
+            },
+            "min": 1,
+            "max": 900,
+            "step": 1,
+            "placeholder": {
+              "en": "60"
+            }
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "id": "set_surplus_offset",
+        "title": {
+          "en": "Set surplus offset"
+        },
+        "titleFormatted": {
+          "en": "Set surplus offset to [[offset]] W"
+        },
+        "hint": {
+          "en": "Surplus = −battery power − grid power + offset. E.g. 1700 while the battery is nearly full, 0 otherwise."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=sg04lp3"
+          },
+          {
+            "name": "offset",
+            "type": "number",
+            "title": {
+              "en": "Offset (W)"
+            },
+            "min": -20000,
+            "max": 20000,
+            "step": 1,
+            "placeholder": {
+              "en": "1700"
+            }
+          }
+        ]
+      },
+      {
+        "id": "restart_history",
+        "title": {
+          "en": "Restart history"
+        },
+        "hint": {
+          "en": "Forget earlier readings, e.g. right after a heater was switched, so that conditions only look at readings taken since."
+        },
         "args": [
           {
             "type": "device",
@@ -104,6 +260,7 @@
         "measure_power.battery",
         "measure_power.grid",
         "measure_power.load",
+        "measure_power.surplus",
         "battery_soc",
         "measure_temperature.battery",
         "measure_temperature.inverter",
@@ -179,6 +336,14 @@
         "meter_power.discharged_today": {
           "title": {
             "en": "Battery discharged today"
+          }
+        },
+        "measure_power.surplus": {
+          "title": {
+            "en": "Surplus"
+          },
+          "desc": {
+            "en": "Battery charging + grid export + offset: power available for flexible loads"
           }
         }
       },

@@ -4,5 +4,11 @@
   },
   "1.1.0": {
     "en": "More robust connection handling and polling. Finds the logger again after an IP change. Battery charge is a custom capability instead of measure_battery. Pairing fixes."
+  },
+  "1.2.0": {
+    "en": "Surplus capability and token; flow cards: \"value has been above/below a limit for N seconds\", \"set surplus offset\", \"restart history\"."
+  },
+  "1.2.1": {
+    "en": "Status API (poll stats, history span, recent events) for diagnostics."
   }
 }

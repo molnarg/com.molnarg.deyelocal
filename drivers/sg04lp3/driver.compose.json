@@ -8,6 +8,7 @@
     "measure_power.battery",
     "measure_power.grid",
     "measure_power.load",
+    "measure_power.surplus",
     "battery_soc",
     "measure_temperature.battery",
     "measure_temperature.inverter",
@@ -83,6 +84,14 @@
     "meter_power.discharged_today": {
       "title": {
         "en": "Battery discharged today"
+      }
+    },
+    "measure_power.surplus": {
+      "title": {
+        "en": "Surplus"
+      },
+      "desc": {
+        "en": "Battery charging + grid export + offset: power available for flexible loads"
       }
     }
   },

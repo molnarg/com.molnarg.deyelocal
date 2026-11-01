@@ -10,6 +10,12 @@ class Sg04lp3Driver extends Driver {
 
   async onInit() {
     this._dataUpdated = this.homey.flow.getDeviceTriggerCard('data_updated');
+    this.homey.flow.getConditionCard('value_held')
+      .registerRunListener(async args => args.device.valueHeld(args));
+    this.homey.flow.getActionCard('set_surplus_offset')
+      .registerRunListener(async args => args.device.setSurplusOffset(args.offset));
+    this.homey.flow.getActionCard('restart_history')
+      .registerRunListener(async args => args.device.restartHistory());
   }
 
   triggerDataUpdated(device, data) {
@@ -19,6 +25,7 @@ class Sg04lp3Driver extends Driver {
       grid_power: data.grid_power,
       load_power: data.load_power,
       battery_soc: data.battery_soc,
+      surplus: data.surplus,
     }).catch(err => this.error('Trigger failed:', err.message));
   }
 
