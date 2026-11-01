@@ -1,0 +1,33 @@
+{
+  "id": "com.molnarg.deyelocal",
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Deye Inverter (Local)"
+  },
+  "description": {
+    "en": "Live data from your Deye inverter over the local network, no cloud needed"
+  },
+  "category": [
+    "energy"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Gábor Molnár",
+    "email": "gabor@molnar-papp.hu"
+  },
+  "brandColor": "#E84D0E",
+  "source": "https://github.com/molnarg/com.molnarg.deyelocal",
+  "bugs": {
+    "url": "https://github.com/molnarg/com.molnarg.deyelocal/issues"
+  }
+}

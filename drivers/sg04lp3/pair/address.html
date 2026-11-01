@@ -1,0 +1,17 @@
+<h1 class="homey-title" data-i18n="pair.address.title"></h1>
+<p data-i18n="pair.address.description"></p>
+<form class="homey-form">
+  <label class="homey-form-label" for="host" data-i18n="pair.address.host"></label>
+  <input class="homey-form-input" id="host" type="text" placeholder="192.168.X.X" onchange="Homey.emit('set_host', this.value)">
+  <label class="homey-form-label" for="serial" data-i18n="pair.address.serial"></label>
+  <input class="homey-form-input" id="serial" type="text" inputmode="numeric" placeholder="31XXXXXXXX" onchange="Homey.emit('set_serial', this.value)">
+</form>
+<p id="searching" style="margin-top: 1em;" data-i18n="pair.address.searching"></p>
+<script>
+  Homey.emit('prefill').then(function (prefill) {
+    document.getElementById('searching').style.display = 'none';
+    if (!prefill) return;
+    document.getElementById('host').value = prefill.host;
+    document.getElementById('serial').value = prefill.serial;
+  });
+</script>

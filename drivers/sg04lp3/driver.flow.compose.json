@@ -1,0 +1,16 @@
+{
+  "triggers": [
+    {
+      "id": "data_updated",
+      "title": { "en": "Measured data updated" },
+      "hint": { "en": "Fires after every successful read of the inverter" },
+      "tokens": [
+        { "name": "solar_power", "type": "number", "title": { "en": "Solar power (W)" }, "example": 3200 },
+        { "name": "battery_power", "type": "number", "title": { "en": "Battery power (W, − = charging)" }, "example": -1500 },
+        { "name": "grid_power", "type": "number", "title": { "en": "Grid power (W, − = exporting)" }, "example": -800 },
+        { "name": "load_power", "type": "number", "title": { "en": "Load power (W)" }, "example": 900 },
+        { "name": "battery_soc", "type": "number", "title": { "en": "Battery (%)" }, "example": 80 }
+      ]
+    }
+  ]
+}

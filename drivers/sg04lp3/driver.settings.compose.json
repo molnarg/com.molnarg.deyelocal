@@ -1,0 +1,32 @@
+[
+  {
+    "type": "group",
+    "label": { "en": "Logger" },
+    "children": [
+      {
+        "id": "host",
+        "type": "text",
+        "label": { "en": "IP address" },
+        "value": "",
+        "hint": { "en": "LAN address of the Solarman Wi-Fi logger stick" }
+      },
+      {
+        "id": "serial",
+        "type": "text",
+        "label": { "en": "Logger serial number" },
+        "value": "",
+        "hint": { "en": "Serial of the logger stick (not the inverter), e.g. on its label or the logger's web page" }
+      },
+      {
+        "id": "poll_interval",
+        "type": "number",
+        "label": { "en": "Poll interval" },
+        "value": 10,
+        "min": 5,
+        "max": 300,
+        "units": { "en": "s" },
+        "hint": { "en": "How often to read the inverter. The logger is slow; below 5 s it can become unstable." }
+      }
+    ]
+  }
+]

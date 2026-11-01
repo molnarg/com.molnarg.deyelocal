@@ -1,0 +1,90 @@
+{
+  "name": {
+    "en": "Deye Hybrid Inverter (3-phase)"
+  },
+  "class": "other",
+  "capabilities": [
+    "measure_power.solar",
+    "measure_power.battery",
+    "measure_power.grid",
+    "measure_power.load",
+    "measure_battery",
+    "measure_temperature.battery",
+    "measure_temperature.inverter",
+    "meter_power.production_today",
+    "meter_power.consumption_today",
+    "meter_power.bought_today",
+    "meter_power.sold_today",
+    "meter_power.charged_today",
+    "meter_power.discharged_today"
+  ],
+  "capabilitiesOptions": {
+    "measure_power.solar": {
+      "title": { "en": "Solar power" }
+    },
+    "measure_power.battery": {
+      "title": { "en": "Battery power" },
+      "desc": { "en": "Negative while charging, positive while discharging" }
+    },
+    "measure_power.grid": {
+      "title": { "en": "Grid power" },
+      "desc": { "en": "Positive while importing, negative while exporting" }
+    },
+    "measure_power.load": {
+      "title": { "en": "Load power" }
+    },
+    "measure_temperature.battery": {
+      "title": { "en": "Battery temperature" }
+    },
+    "measure_temperature.inverter": {
+      "title": { "en": "Inverter temperature" }
+    },
+    "meter_power.production_today": {
+      "title": { "en": "Production today" }
+    },
+    "meter_power.consumption_today": {
+      "title": { "en": "Consumption today" }
+    },
+    "meter_power.bought_today": {
+      "title": { "en": "Bought today" }
+    },
+    "meter_power.sold_today": {
+      "title": { "en": "Sold today" }
+    },
+    "meter_power.charged_today": {
+      "title": { "en": "Battery charged today" }
+    },
+    "meter_power.discharged_today": {
+      "title": { "en": "Battery discharged today" }
+    }
+  },
+  "energy": {
+    "batteries": ["OTHER"]
+  },
+  "platforms": [
+    "local"
+  ],
+  "connectivity": [
+    "lan"
+  ],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "address",
+      "navigation": { "next": "list_my_devices" }
+    },
+    {
+      "id": "list_my_devices",
+      "template": "list_devices",
+      "navigation": { "next": "add_my_devices" }
+    },
+    {
+      "id": "add_my_devices",
+      "template": "add_devices"
+    }
+  ]
+}

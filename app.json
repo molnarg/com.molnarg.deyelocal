@@ -1,0 +1,271 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "com.molnarg.deyelocal",
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Deye Inverter (Local)"
+  },
+  "description": {
+    "en": "Live data from your Deye inverter over the local network, no cloud needed"
+  },
+  "category": [
+    "energy"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Gábor Molnár",
+    "email": "gabor@molnar-papp.hu"
+  },
+  "brandColor": "#E84D0E",
+  "source": "https://github.com/molnarg/com.molnarg.deyelocal",
+  "bugs": {
+    "url": "https://github.com/molnarg/com.molnarg.deyelocal/issues"
+  },
+  "flow": {
+    "triggers": [
+      {
+        "id": "data_updated",
+        "title": {
+          "en": "Measured data updated"
+        },
+        "hint": {
+          "en": "Fires after every successful read of the inverter"
+        },
+        "tokens": [
+          {
+            "name": "solar_power",
+            "type": "number",
+            "title": {
+              "en": "Solar power (W)"
+            },
+            "example": 3200
+          },
+          {
+            "name": "battery_power",
+            "type": "number",
+            "title": {
+              "en": "Battery power (W, − = charging)"
+            },
+            "example": -1500
+          },
+          {
+            "name": "grid_power",
+            "type": "number",
+            "title": {
+              "en": "Grid power (W, − = exporting)"
+            },
+            "example": -800
+          },
+          {
+            "name": "load_power",
+            "type": "number",
+            "title": {
+              "en": "Load power (W)"
+            },
+            "example": 900
+          },
+          {
+            "name": "battery_soc",
+            "type": "number",
+            "title": {
+              "en": "Battery (%)"
+            },
+            "example": 80
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=sg04lp3"
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Deye Hybrid Inverter (3-phase)"
+      },
+      "class": "other",
+      "capabilities": [
+        "measure_power.solar",
+        "measure_power.battery",
+        "measure_power.grid",
+        "measure_power.load",
+        "measure_battery",
+        "measure_temperature.battery",
+        "measure_temperature.inverter",
+        "meter_power.production_today",
+        "meter_power.consumption_today",
+        "meter_power.bought_today",
+        "meter_power.sold_today",
+        "meter_power.charged_today",
+        "meter_power.discharged_today"
+      ],
+      "capabilitiesOptions": {
+        "measure_power.solar": {
+          "title": {
+            "en": "Solar power"
+          }
+        },
+        "measure_power.battery": {
+          "title": {
+            "en": "Battery power"
+          },
+          "desc": {
+            "en": "Negative while charging, positive while discharging"
+          }
+        },
+        "measure_power.grid": {
+          "title": {
+            "en": "Grid power"
+          },
+          "desc": {
+            "en": "Positive while importing, negative while exporting"
+          }
+        },
+        "measure_power.load": {
+          "title": {
+            "en": "Load power"
+          }
+        },
+        "measure_temperature.battery": {
+          "title": {
+            "en": "Battery temperature"
+          }
+        },
+        "measure_temperature.inverter": {
+          "title": {
+            "en": "Inverter temperature"
+          }
+        },
+        "meter_power.production_today": {
+          "title": {
+            "en": "Production today"
+          }
+        },
+        "meter_power.consumption_today": {
+          "title": {
+            "en": "Consumption today"
+          }
+        },
+        "meter_power.bought_today": {
+          "title": {
+            "en": "Bought today"
+          }
+        },
+        "meter_power.sold_today": {
+          "title": {
+            "en": "Sold today"
+          }
+        },
+        "meter_power.charged_today": {
+          "title": {
+            "en": "Battery charged today"
+          }
+        },
+        "meter_power.discharged_today": {
+          "title": {
+            "en": "Battery discharged today"
+          }
+        }
+      },
+      "energy": {
+        "batteries": [
+          "OTHER"
+        ]
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/sg04lp3/assets/images/small.png",
+        "large": "/drivers/sg04lp3/assets/images/large.png",
+        "xlarge": "/drivers/sg04lp3/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "address",
+          "navigation": {
+            "next": "list_my_devices"
+          }
+        },
+        {
+          "id": "list_my_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_my_devices"
+          }
+        },
+        {
+          "id": "add_my_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "sg04lp3",
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Logger"
+          },
+          "children": [
+            {
+              "id": "host",
+              "type": "text",
+              "label": {
+                "en": "IP address"
+              },
+              "value": "",
+              "hint": {
+                "en": "LAN address of the Solarman Wi-Fi logger stick"
+              }
+            },
+            {
+              "id": "serial",
+              "type": "text",
+              "label": {
+                "en": "Logger serial number"
+              },
+              "value": "",
+              "hint": {
+                "en": "Serial of the logger stick (not the inverter), e.g. on its label or the logger's web page"
+              }
+            },
+            {
+              "id": "poll_interval",
+              "type": "number",
+              "label": {
+                "en": "Poll interval"
+              },
+              "value": 10,
+              "min": 5,
+              "max": 300,
+              "units": {
+                "en": "s"
+              },
+              "hint": {
+                "en": "How often to read the inverter. The logger is slow; below 5 s it can become unstable."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
