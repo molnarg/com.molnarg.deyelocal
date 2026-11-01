@@ -8,7 +8,7 @@
     "measure_power.battery",
     "measure_power.grid",
     "measure_power.load",
-    "measure_battery",
+    "battery_soc",
     "measure_temperature.battery",
     "measure_temperature.inverter",
     "meter_power.production_today",
@@ -20,46 +20,71 @@
   ],
   "capabilitiesOptions": {
     "measure_power.solar": {
-      "title": { "en": "Solar power" }
+      "title": {
+        "en": "Solar power"
+      }
     },
     "measure_power.battery": {
-      "title": { "en": "Battery power" },
-      "desc": { "en": "Negative while charging, positive while discharging" }
+      "title": {
+        "en": "Battery power"
+      },
+      "desc": {
+        "en": "Negative while charging, positive while discharging"
+      }
     },
     "measure_power.grid": {
-      "title": { "en": "Grid power" },
-      "desc": { "en": "Positive while importing, negative while exporting" }
+      "title": {
+        "en": "Grid power"
+      },
+      "desc": {
+        "en": "Positive while importing, negative while exporting"
+      }
     },
     "measure_power.load": {
-      "title": { "en": "Load power" }
+      "title": {
+        "en": "Load power"
+      }
     },
     "measure_temperature.battery": {
-      "title": { "en": "Battery temperature" }
+      "title": {
+        "en": "Battery temperature"
+      }
     },
     "measure_temperature.inverter": {
-      "title": { "en": "Inverter temperature" }
+      "title": {
+        "en": "Inverter temperature"
+      }
     },
     "meter_power.production_today": {
-      "title": { "en": "Production today" }
+      "title": {
+        "en": "Production today"
+      }
     },
     "meter_power.consumption_today": {
-      "title": { "en": "Consumption today" }
+      "title": {
+        "en": "Consumption today"
+      }
     },
     "meter_power.bought_today": {
-      "title": { "en": "Bought today" }
+      "title": {
+        "en": "Bought today"
+      }
     },
     "meter_power.sold_today": {
-      "title": { "en": "Sold today" }
+      "title": {
+        "en": "Sold today"
+      }
     },
     "meter_power.charged_today": {
-      "title": { "en": "Battery charged today" }
+      "title": {
+        "en": "Battery charged today"
+      }
     },
     "meter_power.discharged_today": {
-      "title": { "en": "Battery discharged today" }
+      "title": {
+        "en": "Battery discharged today"
+      }
     }
-  },
-  "energy": {
-    "batteries": ["OTHER"]
   },
   "platforms": [
     "local"
@@ -74,13 +99,14 @@
   },
   "pair": [
     {
-      "id": "address",
-      "navigation": { "next": "list_my_devices" }
+      "id": "address"
     },
     {
       "id": "list_my_devices",
       "template": "list_devices",
-      "navigation": { "next": "add_my_devices" }
+      "navigation": {
+        "next": "add_my_devices"
+      }
     },
     {
       "id": "add_my_devices",

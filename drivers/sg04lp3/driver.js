@@ -2,7 +2,7 @@
 
 const { Driver } = require('homey');
 const {
-  SolarmanClient, discover, scanPort, fetchLoggerSerial,
+  SolarmanClient, findLoggers, isValidHost, isValidSerial,
 } = require('../../lib/solarman');
 const sg04lp3 = require('../../lib/sg04lp3');
 
@@ -22,40 +22,30 @@ class Sg04lp3Driver extends Driver {
     }).catch(err => this.error('Trigger failed:', err.message));
   }
 
-  async _findLogger() {
-    const loggers = await discover({ timeout: 2000 }).catch(() => []);
-    this.log('UDP discovery:', JSON.stringify(loggers));
-    if (loggers.length) return { host: loggers[0].host, serial: loggers[0].serial };
-
-    const address = await this.homey.cloud.getLocalAddress(); // "192.168.31.21:80"
-    const m = /^(\d+\.\d+\.\d+)\.\d+/.exec(address || '');
-    if (!m) return null;
-    const hosts = await scanPort({ prefix: m[1] });
-    this.log('Hosts with port 8899 open in ' + m[1] + '.0/24:', JSON.stringify(hosts));
-    for (const candidate of hosts) {
-      const loggerSerial = await fetchLoggerSerial(candidate);
-      if (loggerSerial) return { host: candidate, serial: loggerSerial };
-    }
-    return hosts.length ? { host: hosts[0], serial: null } : null;
-  }
-
   async onPair(session) {
     let host = '';
     let serial = '';
 
-    session.setHandler('set_host', async value => { host = String(value).trim(); });
-    session.setHandler('set_serial', async value => { serial = String(value).trim(); });
+    // The view sends both fields together right before moving on (see
+    // pair/address.html), so list_devices always sees what's on screen.
+    session.setHandler('set_address', async value => {
+      const h = String(value && value.host || '').trim();
+      const s = String(value && value.serial || '').trim();
+      if (!isValidHost(h)) throw new Error(this.homey.__('pair.error.host'));
+      if (!isValidSerial(s)) throw new Error(this.homey.__('pair.error.serial'));
+      host = h;
+      serial = s;
+    });
 
-    // Prefill the form: UDP discovery first, then a TCP 8899 scan of the
-    // Homey's own /24 plus the serial from the logger's web page.
+    // Suggest a logger: UDP discovery, else a TCP 8899 scan of the Homey's /24
+    // plus the serial from the logger's web page. Only a suggestion: the view
+    // fills empty fields with it.
     session.setHandler('prefill', async () => {
       try {
-        const found = await this._findLogger();
-        this.log('Prefill:', JSON.stringify(found));
-        if (!found) return null;
-        host = found.host;
-        serial = found.serial ? String(found.serial) : '';
-        return { host, serial };
+        const loggers = await findLoggers(await this.homey.cloud.getLocalAddress(), this.log.bind(this));
+        const best = loggers.filter(l => l.serial)[0] || loggers[0];
+        this.log('Prefill:', JSON.stringify(best || null));
+        return best ? { host: best.host, serial: best.serial ? String(best.serial) : '' } : null;
       } catch (err) {
         this.error('Prefill failed:', err.message);
         return null;
@@ -63,8 +53,8 @@ class Sg04lp3Driver extends Driver {
     });
 
     session.setHandler('list_devices', async () => {
-      if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) throw new Error(this.homey.__('pair.error.host'));
-      if (!/^\d+$/.test(serial)) throw new Error(this.homey.__('pair.error.serial'));
+      if (!isValidHost(host)) throw new Error(this.homey.__('pair.error.host'));
+      if (!isValidSerial(serial)) throw new Error(this.homey.__('pair.error.serial'));
 
       const client = new SolarmanClient({ host, serial, log: this.log.bind(this) });
       try {

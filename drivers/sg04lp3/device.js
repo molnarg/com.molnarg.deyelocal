@@ -1,18 +1,22 @@
 'use strict';
 
 const { Device } = require('homey');
-const { SolarmanClient } = require('../../lib/solarman');
+const {
+  SolarmanClient, findLoggers, isValidHost, isValidSerial,
+} = require('../../lib/solarman');
 const sg04lp3 = require('../../lib/sg04lp3');
 
 // Consecutive failed polls before the device is marked unavailable.
 const MAX_FAILURES = 3;
+// While unavailable, look for the logger at a new IP at most this often.
+const REDISCOVER_INTERVAL = 5 * 60 * 1000;
 
 const CAPABILITIES = {
   'measure_power.solar': 'solar_power',
   'measure_power.battery': 'battery_power',
   'measure_power.grid': 'grid_power',
   'measure_power.load': 'load_power',
-  measure_battery: 'battery_soc',
+  battery_soc: 'battery_soc',
   'measure_temperature.battery': 'battery_temperature',
   'measure_temperature.inverter': 'inverter_temperature',
   'meter_power.production_today': 'daily_production',
@@ -29,16 +33,34 @@ class Sg04lp3Device extends Device {
     this._failures = 0;
     this._timer = null;
     this._stopped = false;
+    this._lastRediscover = 0;
+    await this._migrateCapabilities();
     this._connect(this.getSettings());
     this._schedule(0);
   }
 
-  async onSettings({ newSettings, changedKeys }) {
-    if (changedKeys.indexOf('host') >= 0 || changedKeys.indexOf('serial') >= 0) {
-      if (!/^\d+$/.test(String(newSettings.serial).trim())) throw new Error(this.homey.__('pair.error.serial'));
-      this._connect(newSettings);
+  // 1.0.0 used measure_battery, which makes Homey treat the device as running
+  // on replaceable batteries (low-battery warnings at night).
+  async _migrateCapabilities() {
+    try {
+      if (this.hasCapability('measure_battery')) await this.removeCapability('measure_battery');
+      for (const capability of Object.keys(CAPABILITIES)) {
+        if (!this.hasCapability(capability)) await this.addCapability(capability);
+      }
+    } catch (err) {
+      this.error('Capability migration failed:', err.message);
     }
-    this._schedule(0);
+  }
+
+  async onSettings({ newSettings, changedKeys }) {
+    if (!isValidHost(newSettings.host)) throw new Error(this.homey.__('pair.error.host'));
+    if (!isValidSerial(newSettings.serial)) throw new Error(this.homey.__('pair.error.serial'));
+    if (changedKeys.indexOf('host') >= 0 || changedKeys.indexOf('serial') >= 0) {
+      this._connect(newSettings);
+      this._failures = 0;
+    }
+    // Poll right away, after Homey has stored the new settings.
+    this._schedule(1000);
   }
 
   async onUninit() {
@@ -51,11 +73,16 @@ class Sg04lp3Device extends Device {
 
   _connect(settings) {
     if (this._client) this._client.close();
-    this._client = new SolarmanClient({
-      host: String(settings.host).trim(),
-      serial: String(settings.serial).trim(),
-      log: this.log.bind(this),
-    });
+    this._client = null;
+    try {
+      this._client = new SolarmanClient({
+        host: settings.host,
+        serial: settings.serial,
+        log: this.log.bind(this),
+      });
+    } catch (err) {
+      this.error('Invalid settings:', err.message);
+    }
   }
 
   _stop() {
@@ -70,26 +97,35 @@ class Sg04lp3Device extends Device {
     if (this._timer) this.homey.clearTimeout(this._timer);
     this._timer = this.homey.setTimeout(() => {
       this._timer = null;
-      this._poll().then(() => {
-        const seconds = Math.max(5, Number(this.getSetting('poll_interval')) || 10);
-        if (!this._timer) this._schedule(seconds * 1000);
-      });
+      this._poll()
+        .catch(err => this.error('Poll crashed:', err && err.stack ? err.stack : err))
+        .then(() => {
+          // onSettings may have scheduled a poll meanwhile.
+          if (this._stopped || this._timer) return;
+          let seconds = 10;
+          try { seconds = Number(this.getSetting('poll_interval')) || 10; } catch (e) { /* deleted */ }
+          this._schedule(Math.max(5, seconds) * 1000);
+        });
     }, delayMs);
   }
 
   async _poll() {
-    let data;
-    try {
-      data = await sg04lp3.read(this._client);
-    } catch (err) {
-      this._failures++;
-      this.error('Poll failed (' + this._failures + 'x):', err.message);
-      this._client.close(); // reconnect on the next poll
-      if (this._failures >= MAX_FAILURES && this.getAvailable()) {
-        await this.setUnavailable(err.message).catch(this.error);
-      }
+    const client = this._client;
+    if (!client) {
+      await this._failed(new Error(this.homey.__('pair.error.serial')));
       return;
     }
+
+    let data;
+    try {
+      data = await sg04lp3.read(client);
+    } catch (err) {
+      if (client !== this._client) return; // settings changed meanwhile
+      client.reset(); // reconnect on the next poll
+      await this._failed(err);
+      return;
+    }
+    if (client !== this._client || this._stopped) return;
 
     this._failures = 0;
     if (!this.getAvailable()) await this.setAvailable().catch(this.error);
@@ -101,6 +137,33 @@ class Sg04lp3Device extends Device {
       }
     }
     await this.driver.triggerDataUpdated(this, data);
+  }
+
+  async _failed(err) {
+    this._failures++;
+    this.error('Poll failed (' + this._failures + 'x):', err.message);
+    if (this._failures < MAX_FAILURES) return;
+    if (this.getAvailable()) await this.setUnavailable(err.message).catch(this.error);
+    if (Date.now() - this._lastRediscover >= REDISCOVER_INTERVAL) {
+      this._lastRediscover = Date.now();
+      await this._rediscover().catch(e => this.error('Rediscovery failed:', e.message));
+    }
+  }
+
+  // The logger may have got a new IP from DHCP: look for its serial on the LAN.
+  async _rediscover() {
+    const settings = this.getSettings();
+    const serial = Number(String(settings.serial).trim());
+    const loggers = await findLoggers(await this.homey.cloud.getLocalAddress(), this.log.bind(this));
+    const match = loggers.filter(l => l.serial === serial)[0];
+    if (!match) {
+      this.log('Rediscovery: logger ' + serial + ' not found');
+      return;
+    }
+    if (match.host === String(settings.host).trim() || this._stopped) return;
+    this.log('Rediscovery: logger ' + serial + ' moved to ' + match.host);
+    await this.setSettings({ host: match.host });
+    this._connect(Object.assign({}, settings, { host: match.host }));
   }
 
 }

@@ -5,11 +5,12 @@
       "description": "Enter the IP address and serial number of the Wi-Fi logger stick plugged into the inverter. The serial is on the stick's label and on its web page (Device serial number).",
       "host": "IP address",
       "serial": "Logger serial number",
-      "searching": "Searching the network for loggers…"
+      "searching": "Searching the network for loggers…",
+      "next": "Next"
     },
     "error": {
       "host": "Please enter a valid IPv4 address.",
-      "serial": "The logger serial number must contain digits only.",
+      "serial": "The logger serial number must be a number (digits only, at most 4294967295).",
       "type": "This inverter (device type __type__) is not a three-phase low-voltage hybrid (SG04LP3), which is the only model this app supports so far."
     }
   }

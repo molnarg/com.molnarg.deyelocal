@@ -1,17 +1,36 @@
 <h1 class="homey-title" data-i18n="pair.address.title"></h1>
 <p data-i18n="pair.address.description"></p>
-<form class="homey-form">
+<form class="homey-form" id="form">
   <label class="homey-form-label" for="host" data-i18n="pair.address.host"></label>
-  <input class="homey-form-input" id="host" type="text" placeholder="192.168.X.X" onchange="Homey.emit('set_host', this.value)">
+  <input class="homey-form-input" id="host" type="text" inputmode="decimal" placeholder="192.168.X.X">
   <label class="homey-form-label" for="serial" data-i18n="pair.address.serial"></label>
-  <input class="homey-form-input" id="serial" type="text" inputmode="numeric" placeholder="31XXXXXXXX" onchange="Homey.emit('set_serial', this.value)">
+  <input class="homey-form-input" id="serial" type="text" inputmode="numeric" placeholder="31XXXXXXXX">
+  <p id="searching" style="margin-top: 1em;" data-i18n="pair.address.searching"></p>
+  <button class="homey-button-primary-full" id="next" type="submit" style="margin-top: 1em;" data-i18n="pair.address.next"></button>
 </form>
-<p id="searching" style="margin-top: 1em;" data-i18n="pair.address.searching"></p>
 <script>
+  var hostInput = document.getElementById('host');
+  var serialInput = document.getElementById('serial');
+  var nextButton = document.getElementById('next');
+
+  // Discovery can take several seconds: only fill fields the user left empty.
   Homey.emit('prefill').then(function (prefill) {
     document.getElementById('searching').style.display = 'none';
     if (!prefill) return;
-    document.getElementById('host').value = prefill.host;
-    document.getElementById('serial').value = prefill.serial;
+    if (!hostInput.value) hostInput.value = prefill.host;
+    if (!serialInput.value) serialInput.value = prefill.serial;
+  }).catch(function () {
+    document.getElementById('searching').style.display = 'none';
+  });
+
+  // Send both fields in one message and only then continue, so the driver
+  // never works with stale values.
+  document.getElementById('form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    nextButton.disabled = true;
+    Homey.emit('set_address', { host: hostInput.value, serial: serialInput.value })
+      .then(function () { Homey.showView('list_my_devices'); })
+      .catch(function (err) { Homey.alert(err.message || String(err)); })
+      .then(function () { nextButton.disabled = false; });
   });
 </script>

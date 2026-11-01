@@ -1,0 +1,20 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Battery"
+  },
+  "desc": {
+    "en": "State of charge of the home battery"
+  },
+  "units": {
+    "en": "%"
+  },
+  "decimals": 0,
+  "min": 0,
+  "max": 100,
+  "getable": true,
+  "setable": false,
+  "uiComponent": "sensor",
+  "icon": "/assets/battery.svg",
+  "insights": true
+}

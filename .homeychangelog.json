@@ -1,0 +1,8 @@
+{
+  "1.0.0": {
+    "en": "First release: local polling of Deye SG04LP3 hybrids via the Solarman logger."
+  },
+  "1.1.0": {
+    "en": "More robust connection handling and polling. Finds the logger again after an IP change. Battery charge is a custom capability instead of measure_battery. Pairing fixes."
+  }
+}
